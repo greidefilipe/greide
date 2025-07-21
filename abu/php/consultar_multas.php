@@ -61,6 +61,10 @@ try {
                 <i class="fas fa-search fa-fw"></i>
                 <span>Consultar Multas</span>
             </a>
+            <a href="aprovar_pagamentos.php" class="nav-link">
+                <i class="fas fa-check-circle fa-fw"></i>
+                <span>Aprovar Pagamentos</span>
+            </a>
         </nav>
         <div class="sidebar-footer">
             <a href="#" class="nav-link">
@@ -139,6 +143,17 @@ try {
                     <button type="submit" class="btn btn-primary">Salvar</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal para visualizar informações da multa -->
+    <div id="modal-info-multa" class="modal">
+        <div class="modal-content modal-large">
+            <span class="modal-close">&times;</span>
+            <h2 class="modal-title"><i class="fas fa-info-circle"></i> Informações da Multa</h2>
+            <div id="modal-info-content">
+                <!-- Conteúdo será carregado dinamicamente -->
+            </div>
         </div>
     </div>
     

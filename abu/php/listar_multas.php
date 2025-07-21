@@ -12,9 +12,13 @@ try {
                 m.id,
                 m.data_hora_infracao,
                 m.valor_multa,
+                m.status_pagamento,
+                m.local_infracao,
+                m.comprovante_pagamento,
                 v.placa AS veiculo_placa,
                 COALESCE(u.name, m.usuario_nome_digitado) AS condutor_nome,
-                ai.codigo_auto AS infracao_codigo
+                ai.codigo_auto AS infracao_codigo,
+                ai.descricao AS infracao_descricao
             FROM multas AS m
             LEFT JOIN veiculos AS v ON m.veiculo_id = v.id
             LEFT JOIN usuarios AS u ON m.usuario_id = u.id
