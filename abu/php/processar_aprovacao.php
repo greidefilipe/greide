@@ -34,23 +34,37 @@ if ($acao === 'aprovar') {
 try {
     $conn->beginTransaction();
 
-    // Atualiza o status da multa
-    $sql = "UPDATE multas SET status_pagamento = ? WHERE id = ? AND status_pagamento = 'Aguardando Aprovação'";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute([$novo_status, $multa_id]);
+    // Primeiro verifica se a coluna status_pagamento existe
+    try {
+        // Tenta fazer um UPDATE simples para verificar se a coluna existe
+        $sql_test = "SELECT COUNT(*) FROM multas WHERE 1=0 AND status_pagamento IS NULL";
+        $conn->query($sql_test);
+        
+        // Se chegou aqui, a coluna existe
+        $sql = "UPDATE multas SET status_pagamento = ? WHERE id = ? AND COALESCE(status_pagamento, '') IN ('', 'Aguardando Aprovação')";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$novo_status, $multa_id]);
 
-    if ($stmt->rowCount() === 0) {
-        throw new Exception('Multa não encontrada ou não está aguardando aprovação.');
+        if ($stmt->rowCount() === 0) {
+            throw new Exception('Multa não encontrada ou não está aguardando aprovação.');
+        }
+
+        $conn->commit();
+        echo json_encode([
+            'status' => 'success', 
+            'message' => ($acao === 'aprovar') ? 'Pagamento aprovado com sucesso!' : 'Pagamento recusado com sucesso!'
+        ]);
+        
+    } catch (PDOException $e_coluna) {
+        // A coluna não existe ainda
+        $conn->rollback();
+        throw new Exception('Funcionalidade de aprovação requer atualização do banco de dados. Coluna status_pagamento não encontrada.');
     }
 
-    $conn->commit();
-    echo json_encode([
-        'status' => 'success', 
-        'message' => ($acao === 'aprovar') ? 'Pagamento aprovado com sucesso!' : 'Pagamento recusado com sucesso!'
-    ]);
-
 } catch (Exception $e) {
-    $conn->rollback();
+    if ($conn->inTransaction()) {
+        $conn->rollback();
+    }
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }

@@ -46,7 +46,8 @@ $(document).ready(function() {
                         tabelaBody.append(linha);
                     });
                 } else {
-                    tabelaBody.append('<tr><td colspan="7" style="text-align:center;">Nenhuma multa aguardando aprovação encontrada.</td></tr>');
+                    const mensagem = response.message || 'Nenhuma multa aguardando aprovação encontrada.';
+                    tabelaBody.append(`<tr><td colspan="7" style="text-align:center;">${mensagem}</td></tr>`);
                 }
             },
             error: function() {

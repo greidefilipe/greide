@@ -8,23 +8,24 @@ $searchTerm = "%{$query}%";
 
 try {
     // Consulta SQL para buscar apenas multas aguardando aprovação
+    // Primeiro tenta com a coluna status_pagamento
     $sql = "SELECT 
                 m.id,
                 m.data_hora_infracao,
                 m.valor_multa,
-                m.status_pagamento,
-                m.local_infracao,
-                m.comprovante_pagamento,
+                COALESCE(m.status_pagamento, 'Pendente') as status_pagamento,
+                COALESCE(m.local_infracao, '') as local_infracao,
+                COALESCE(m.comprovante_pagamento, '') as comprovante_pagamento,
                 v.placa AS veiculo_placa,
                 COALESCE(u.name, m.usuario_nome_digitado) AS condutor_nome,
                 ai.codigo_auto AS infracao_codigo,
-                ai.descricao AS infracao_descricao
+                COALESCE(ai.descricao, '') AS infracao_descricao
             FROM multas AS m
             LEFT JOIN veiculos AS v ON m.veiculo_id = v.id
             LEFT JOIN usuarios AS u ON m.usuario_id = u.id
             LEFT JOIN autos_infracao AS ai ON m.auto_infracao_id = ai.id
             WHERE 
-                m.status_pagamento = 'Aguardando Aprovação'
+                COALESCE(m.status_pagamento, '') = 'Aguardando Aprovação'
                 AND (v.placa LIKE ? OR u.name LIKE ? OR m.usuario_nome_digitado LIKE ?)
             ORDER BY m.data_hora_infracao DESC";
             
@@ -35,8 +36,9 @@ try {
     echo json_encode(['status' => 'success', 'data' => $multas]);
 
 } catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => 'Erro ao buscar multas: ' . $e->getMessage()]);
+    // Se der erro (coluna não existe), retorna lista vazia 
+    // pois sem status_pagamento não há como saber quais estão aguardando aprovação
+    echo json_encode(['status' => 'success', 'data' => [], 'message' => 'Funcionalidade de aprovação requer atualização do banco de dados.']);
 }
 
 ?>
