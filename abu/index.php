@@ -29,6 +29,10 @@
                 <i class="fas fa-search fa-fw"></i>
                 <span>Consultar Multas</span>
             </a>
+            <a href="php/aprovar_pagamentos.php" class="nav-link">
+                <i class="fas fa-check-circle fa-fw"></i>
+                <span>Aprovar Pagamentos</span>
+            </a>
         </nav>
         <div class="sidebar-footer">
             <a href="#" class="nav-link">
